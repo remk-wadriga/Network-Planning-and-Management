@@ -1,0 +1,36 @@
+# Editor directories and files
+.idea
+
+###> symfony/framework-bundle ###
+/composer.lock
+/composer.phar
+/symfony.lock
+/.env
+/.env.local
+/.env.local.php
+/.env.*.local
+/public/bundles/
+/var/cache/
+/var/log/
+/vendor/
+/phpunit.xml
+/.env.test
+###< symfony/framework-bundle ###
+
+###> VueJS-bundle ###
+.DS_Store
+/public/node_modules/
+/public/dist/
+/public/npm-debug.log*
+/public/yarn-debug.log*
+/public/yarn-error.log*
+/public/test/unit/coverage/
+###< VueJS-bundle ###
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+/public/img/
+
