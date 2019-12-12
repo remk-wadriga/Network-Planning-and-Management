@@ -1,6 +1,30 @@
-<div id="project_view_page">
-    <h3>Project view</h3>
-    <Graph
-        :data="projectData"
-    />
-</div>
+<b-col id="project_view_page">
+    <h3>Project data:</h3>
+
+    <b-row class="mt-2">
+        <b-col sm="4">
+            <b-form-textarea
+                id="project_view_string_data"
+                v-model="stringData"
+                rows="15"
+            ></b-form-textarea>
+        </b-col>
+    </b-row>
+    <br />
+
+    <b-row>
+        <b-button @click="buildGraph" variant="success">Build graph</b-button>
+    </b-row>
+    <br />
+    <br />
+
+    <b-row>
+        <b-col sm="10">
+        <Graph
+            v-if="showGraph"
+            :data="projectData"
+        />
+        </b-col>
+    </b-row>
+
+</b-col>
