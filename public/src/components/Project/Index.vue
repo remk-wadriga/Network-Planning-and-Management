@@ -10,15 +10,7 @@
         components: { Graph },
         data () {
             return {
-                data: '1\n' +
-                    '4 1\n' +
-                    '2\n' +
-                    '3 1\n' +
-                    '5 2\n' +
-                    '8 5,4\n' +
-                    '7 3\n' +
-                    '9 6\n' +
-                    '6 2',
+                data: '',
                 tasksStack: {},
                 eventsStack: {},
                 events: []
