@@ -5,7 +5,7 @@
         <b-col sm="4">
             <b-form-textarea
                 id="project_view_string_data"
-                v-model="stringData"
+                v-model="data"
                 rows="15"
             ></b-form-textarea>
         </b-col>
@@ -21,8 +21,8 @@
     <b-row>
         <b-col sm="10">
         <Graph
-            v-if="showGraph"
-            :data="projectData"
+            v-if="events.length > 0"
+            :data="events"
         />
         </b-col>
     </b-row>
