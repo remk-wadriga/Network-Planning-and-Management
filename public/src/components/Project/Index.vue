@@ -176,15 +176,14 @@
                     let range1 = event1.getRange()
                     let range2 = event2.getRange()
                     if (range1 === range2) {
-                        return event1.getMiTaskInID() > event2.getMiTaskInID() ? 1 : -1
+                        return event1.getMinTaskInID() > event2.getMinTaskInID() ? 1 : -1
                     }
                     return range1 > range2 ? 1 : -1
                 }).forEach(event => {
                     // Set new event ID
                     event.id = index++
                     // Order event's parents and children
-                    event.orderParents()
-                    event.orderChildren()
+                    event.orderParents().orderChildren()
                     // Write event in stack with new ID
                     this.eventsStack[event.id] = event
                 })

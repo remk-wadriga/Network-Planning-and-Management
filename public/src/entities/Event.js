@@ -17,6 +17,7 @@ export default class Event extends Stack {
             this.addToStack('tasksIn', task)
             this.tasksIn.push(task)
         }
+        return this
     }
 
     addTaskOut (task) {
@@ -24,6 +25,7 @@ export default class Event extends Stack {
             this.addToStack('tasksOut', task)
             this.tasksOut.push(task)
         }
+        return this
     }
 
     addParent (event) {
@@ -31,6 +33,7 @@ export default class Event extends Stack {
             this.addToStack('parents', event)
             this.parents.push(event)
         }
+        return this
     }
 
     addChild (event) {
@@ -58,7 +61,7 @@ export default class Event extends Stack {
         return this.range = maxRange
     }
 
-    getMiTaskInID () {
+    getMinTaskInID () {
         if (this.minTaskInID !== null) {
             return this.minTaskInID
         }
@@ -73,13 +76,15 @@ export default class Event extends Stack {
 
     orderParents () {
         this.parents = this.parents.sort(function (event1, event2) {
-            return event1.getMiTaskInID() > event2.getMiTaskInID() ? 1 : -1
+            return event1.getMinTaskInID() > event2.getMinTaskInID() ? 1 : -1
         })
+        return this
     }
 
     orderChildren () {
         this.children = this.children.sort(function (event1, event2) {
-            return event1.getMiTaskInID() > event2.getMiTaskInID() ? 1 : -1
+            return event1.getMinTaskInID() > event2.getMinTaskInID() ? 1 : -1
         })
+        return this
     }
 }
