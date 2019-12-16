@@ -11,6 +11,7 @@
         data () {
             return {
                 data: '',
+                parentStack: {},
                 tasksStack: {},
                 eventsStack: {},
                 events: []
@@ -24,15 +25,16 @@
                 }
 
                 // Clear old events and stacks
+                this.parentStack = {}
                 this.tasksStack = {}
                 this.eventsStack = {}
                 this.events = []
 
-                // Parse string data and create from it the task with relations and the events
-                this.parseData()
+                // Parse string data and create from it the task with relations
+                this.createTasks()
 
-                // Join events by "in" tasks
-                this.joinEvents()
+                // Create events by created tasks
+                this.createEvents()
 
                 // Set up events hierarchy ("child-to-parent" relations)
                 this.setupEventsHierarchy()
@@ -41,83 +43,64 @@
                 this.orderEvents()
 
                 // Write ordered events from stack to output param
-                let tmpEVents = []
                 Object.keys(this.eventsStack).forEach(id => {
-                    tmpEVents.push(this.eventsStack[id])
+                    this.events.push(this.eventsStack[id])
                 })
-                this.events = tmpEVents
             },
-            parseData () {
-                // Create temporary stack to remember the parents IDs for each task
-                let parentStack = {}
+            createTasks () {
                 this.data.split("\n").forEach(row => {
                     let rowParts = row.split(' ')
                     if (rowParts.length > 0) {
                         let id = rowParts[0]
-                        if (parentStack[id] === undefined) {
-                            parentStack[id] = []
+                        if (this.parentStack[id] === undefined) {
+                            this.parentStack[id] = []
                         }
                         // Add task parents IDs to temporary stack
                         if (rowParts.length === 2) {
                             rowParts[1].split(',').forEach(parentID => {
-                                parentStack[id].push(parentID)
+                                this.parentStack[id].push(parentID)
                             })
                             // Sort parents IDs
-                            if (parentStack[id].length > 1) {
-                                parentStack[id].sort()
+                            if (this.parentStack[id].length > 1) {
+                                this.parentStack[id].sort()
                             }
                         }
                         // Create nte task and add it to the stack
                         this.tasksStack[id] = new Task(id)
-                        // For each new task create a new event to
-                        this.eventsStack[id] = new Event(id)
                     }
                 })
+            },
+            createEvents () {
+                // Create tmp stacks for events and for "added to events tasks"
+                let addedToEvents = {}
 
                 // Add parents to each task (set relations)
-                // Add to each event related tasks - "id" and "out"
+                // Add to each event related tasks - "in" and "out"
                 Object.keys(this.tasksStack).forEach(id => {
                     let task = this.tasksStack[id]
-                    let event = this.eventsStack[id]
+
+                    // Create index for tmp events stack - just line with "in" tasks IDs
+                    let inTasksIndex = this.parentStack[id].length > 0 ? this.parentStack[id].join(':') : 0
+
+                    // Create new events only for unique "in" tasks IDs combination
+                    let event = this.eventsStack[inTasksIndex]
+                    if (event === undefined) {
+                        event = new Event(inTasksIndex)
+                        this.eventsStack[inTasksIndex] = event
+                    }
 
                     // Add task to event's "out"
                     event.addTaskOut(task)
 
-                    parentStack[id].forEach(parentID => {
+                    // Add task's parents to event's "in"
+                    this.parentStack[id].forEach(parentID => {
                         let parentTask = this.tasksStack[parentID]
-                        // Add parent to task
-                        task.addParent(parentTask)
-                        // Add it to event's "in"
                         event.addTaskIn(parentTask)
-                    })
-                })
-            },
-            joinEvents () {
-                // Create tmp stacks for events and for "added to events tasks"
-                let tmpEvents = {}
-                let addedToEvents = {}
-                Object.keys(this.eventsStack).forEach(id => {
-                    let event = this.eventsStack[id]
-                    // Create index for tmp events stack - just line with "in" tasks IDs
-                    let tasksInIds = []
-                    event.tasksIn.forEach(task => {
-                        tasksInIds.push(task.id)
-                        addedToEvents[task.id] = task
-                    })
-                    let inTasksIndex = tasksInIds.length > 0 ? tasksInIds.join(':') : 0
-
-                    // Add in tmp events stack only events with unique "in" tasks
-                    if (tmpEvents[inTasksIndex] === undefined) {
-                        tmpEvents[inTasksIndex] = event
-                    }
-
-                    // Join all "out" tasks for all events with the same "in" tasks
-                    event.tasksOut.forEach(task => {
-                        tmpEvents[inTasksIndex].addTaskOut(task)
+                        addedToEvents[parentID] = parentTask
                     })
                 })
 
-                // Find last tasks - this is the tasks that wasn't added to tm stack
+                // Find last tasks - this is the tasks that wasn't added to tu stack
                 let lastTasks = []
                 Object.keys(this.tasksStack).forEach(id => {
                     if (addedToEvents[id] === undefined) {
@@ -133,23 +116,20 @@
                         lastEvent.addTaskIn(this.tasksStack[id])
                     })
                     // Add last event to tmp events stack
-                    tmpEvents[lastEvent.id] = lastEvent
+                    this.eventsStack[lastEvent.id] = lastEvent
                 }
-
-                // Replace persistent events stack to temporary
-                this.eventsStack = tmpEvents
             },
             setupEventsHierarchy () {
                 Object.keys(this.eventsStack).forEach(id => {
                     let event = this.eventsStack[id]
                     // To find all event's children - just check who has one ot is's "out" tasks it his "in"
                     Object.keys(this.eventsStack).forEach(subID => {
-                        // Not need tho check itself
+                        // Not need to check itself
                         if (subID !== id) {
                             let subEvent = this.eventsStack[subID]
                             event.tasksOut.forEach(task => {
                                 if (subEvent.hasTaskIn(task)) {
-                                    // You have one of my "out" tasks in your "in"? Grate: you area my child and I'm your parent!
+                                    // You have one of my "out" tasks in your "in"? Grate: you are my child and I'm your parent!
                                     subEvent.addParent(event)
                                     event.addChild(subEvent)
                                 }
@@ -171,7 +151,7 @@
                 // Clear unsorted events stack
                 this.eventsStack = {}
 
-                // Sort events by ranges, create new IDs for the and write them to stack
+                // Sort events by ranges, create new IDs and write them to stack
                 tmpEvents.sort(function (event1, event2) {
                     let range1 = event1.getRange()
                     let range2 = event2.getRange()

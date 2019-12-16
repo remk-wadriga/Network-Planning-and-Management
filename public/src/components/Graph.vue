@@ -84,10 +84,9 @@
 
             // Calculate max count of nodes per vertical level and set horizontal levels for each node
             Object.keys(levels).forEach(level => {
-                let xLevel = 0
+                let xLevel = 1
                 levels[level].forEach(node => {
-                    xLevel++
-                    node.xLevel += xLevel
+                    node.xLevel += xLevel++
                 })
                 if (xLevel > maxXLevelsCount) {
                     maxXLevelsCount = xLevel
